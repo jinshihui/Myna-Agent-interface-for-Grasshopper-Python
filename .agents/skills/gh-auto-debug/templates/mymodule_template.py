@@ -3,8 +3,11 @@ print("Module is imported")
 # Set to True when the Agent needs self-check results in last_error.json["validation"].
 ENABLE_VALIDATION = True
 
-# The GH entry script can read this field and write it back to last_error.json.
+# The GH entry script can read this field and write it into the Python sidecar payload.
 VALIDATION_REPORT = None
+
+# Optional extra debug payload for Python-internal diagnostics.
+DEBUG_PAYLOAD = None
 
 
 class YourCalculator:

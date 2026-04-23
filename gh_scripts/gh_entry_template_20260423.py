@@ -242,20 +242,28 @@ if REQUEST_ID:
 
 try:
     with contextlib.redirect_stdout(stdout_buffer), contextlib.redirect_stderr(stderr_buffer):
-        # Agent 改动区 1/2：算法模块
-        module_name = "your_module_name"
+        simulate_timeout_seconds = float(os.environ.get("MYNA_SIMULATE_TIMEOUT_SECONDS", "0") or "0")
+        simulate_timeout_path = os.path.join(PROJECT_ROOT, "_gh_debug", "myna_simulate_timeout_seconds.txt")
+        if simulate_timeout_seconds <= 0.0 and os.path.exists(simulate_timeout_path):
+            with open(simulate_timeout_path, "r", encoding="utf-8-sig") as f:
+                simulate_timeout_seconds = float((f.read() or "0").strip() or "0")
+        if simulate_timeout_seconds > 0.0:
+            time.sleep(simulate_timeout_seconds)
+
+        # Agent edit area 1/2: algorithm module
+        module_name = "surface_geodesic_20260423"
         _update_run_state(module_name=module_name)
         mymodule = importlib.import_module(module_name)
         importlib.reload(mymodule)
 
-        # Agent 改动区 2/2：算法调用
-        calculator = mymodule.YourCalculator(x, y)
+        # Agent edit area 2/2: algorithm call
+        calculator = mymodule.SurfaceGeodesicCalculator(x, y)
         a = calculator.compute()
     ok = True
 except Exception as error_exc:
     traceback_text = traceback.format_exc()
     error_category, error_location = _error_category_and_location(error_exc, traceback_text)
-    # 自动调试流程固定不向上抛异常，始终写 Python sidecar 供 .gha 合并。
+    # Always write the Python sidecar for Myna to merge.
 finally:
     HEARTBEAT_STOP_EVENT.set()
     if heartbeat_thread is not None:
